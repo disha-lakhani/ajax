@@ -1,0 +1,57 @@
+<?php
+include 'mydata.php';  // Ensure this file connects to the database and initializes $conn
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $firstname = $_POST['firstname'];
+    $lastname = $_POST['lastname'];
+    $email = $_POST['email'];
+    $gender = $_POST['gender'];
+    $city = $_POST['city'];
+    $country = $_POST['country'];
+    $hashed_password = md5($_POST['password']);
+    
+    // Handle profile image upload
+    $profileImg = null;
+    if (!empty($_FILES['profileImg']['name'])) {
+        $targetDir = "./uploads/";
+        $profileImg = basename($_FILES["profileImg"]["name"]);
+        move_uploaded_file($_FILES["profileImg"]["tmp_name"], $targetDir . $profileImg);
+    }
+
+    // Insert user data into the database
+    $sql = "INSERT INTO users (firstname, lastname, email, gender, city, country, password, profileImg) 
+            VALUES ('$firstname', '$lastname', '$email', '$gender', '$city', '$country', '$hashed_password', '$profileImg')";
+
+    if ($conn->query($sql) === TRUE) {
+        // Get the last inserted user ID for image uploads
+        $last_id = $conn->insert_id;
+
+        // Handle multiple image uploads
+        if (isset($_FILES['image'])) {
+            $images = $_FILES['image'];
+            $no_of_img = count($images['name']);
+
+            for ($i = 0; $i < $no_of_img; $i++) {
+                $image_name = basename($images['name'][$i]);
+                $tmp_name = $images['tmp_name'][$i];
+                $img_upload_path = $targetDir . $image_name;
+
+                // Move uploaded image
+                if (move_uploaded_file($tmp_name, $img_upload_path)) {
+                    // Insert each image into a separate table (assuming you have a 'user_images' table)
+                    $sql2 = "INSERT INTO user_images (user_id, image_name) VALUES ('$last_id', '$image_name')";
+                    $conn->query($sql2);  // Handle any errors here if needed
+                } else {
+                    echo "Failed to upload image: $image_name";
+                }
+            }
+        }
+
+        // Redirect to login page after successful insertion
+        header("Location: login.php");
+        exit();  // Stop script execution after redirection
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+?>
