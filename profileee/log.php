@@ -37,18 +37,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     setcookie("userpassword", "", time() - 3600);
                 }
             }
-            header('location:profile.php');
-            exit();
-        } else {
-            $_SESSION['error'] = 'Invalid email or password.';
-            header('location: login.php');
-            exit();
-        }
-    } else {
-        $_SESSION['error'] = 'User does not exist, please register first.';
-        header('location: login.php');
-        exit();
-    }
+//             header('location:profile.php');
+//             exit();
+//         } else {
+//             $_SESSION['error'] = 'Invalid email or password.';
+//             header('location: login.php');
+//             exit();
+//         }
+//     } else {
+//         $_SESSION['error'] = 'User does not exist, please register first.';
+//         header('location: login.php');
+//         exit();
+//     }
+// }
+// mysqli_close($conn)
+echo json_encode(["status" => "success", "message" => "Login successful! Redirecting...", "redirect" => "profile.php"]);
+} else {
+    echo json_encode(["status" => "error", "message" => "Invalid email or password."]);
 }
-mysqli_close($conn)
+} else {
+echo json_encode(["status" => "error", "message" => "User does not exist, please register first."]);
+}
+}
+mysqli_close($conn);
 ?>

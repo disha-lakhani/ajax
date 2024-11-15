@@ -1,46 +1,31 @@
 <?php
-$server = "localhost";
-$username = "root";
-$password = "";
-$db = "php_db";
 
-$conn = mysqli_connect($server,$username,$password,$db);
+require 'db.php';
 
-if (!$conn) {
-  die("connection failed : " . mysqli_connect_error());
-}
-
-$id = $_GET['id'];
-$student = [];
-
-if (isset($id)) {
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+  $id = (int) $_GET['id'];
   $sql = "SELECT * FROM student WHERE id=$id";
   $result = mysqli_query($conn, $sql);
-  if ($result && mysqli_num_rows($result) > 0) {
-    $student = mysqli_fetch_assoc($result);
+
+  if (!$result) {
+    die("Query failed: " . mysqli_error($conn));
   }
+
+  if (mysqli_num_rows($result) > 0) {
+    $student = mysqli_fetch_assoc($result);
+  } else {
+    header("location:index.php");
+    exit();
+  }
+
+} else {
+  header("location:index.php");
+  exit();
 }
 
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-  $fname = $_POST['fname'];
-  $lname = $_POST['lname'];
-  $email = $_POST['email'];
-  $class = $_POST['class'];
-
-  $sql = "UPDATE student SET fname='$fname',lname='$lname',email='$email',class='$class' WHERE id=$id";
-
-  if(mysqli_query($conn, $sql)){
-            echo json_encode(["status"=>"success", "message"=>"Student data added successfully"]);
-        } else {
-            echo json_encode(["status"=>"error", "message"=>"Error: " . mysqli_error($conn)]);
-        }
-       
-} 
-
 mysqli_close($conn);
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -74,7 +59,8 @@ mysqli_close($conn);
     .btn {
       width: 100%;
     }
-    .error{
+
+    .error {
       color: red;
     }
   </style>
@@ -86,74 +72,101 @@ mysqli_close($conn);
     <center>
       <h2>UPDATE STUDENTS DATA</h2>
     </center><br>
+    <input type="hidden" id="id" name="id" value="<?php echo $student['id']; ?>">
     <div class="mb-3 mt-3">
+
       <label for="fname" class="form-label">FIRST NAME:</label>
-      <input type="text" class="form-control" id="fname" placeholder="Enter first name" name="fname" value="<?php echo isset($student['fname']) ? $student['fname'] : ''; ?>" >
+      <input type="text" class="form-control" id="fname" placeholder="Enter first name" name="fname"
+        value="<?php echo $student['fname']; ?>">
       <small id="fnameError" class="error"></small>
     </div>
     <div class="mb-3 mt-3">
       <label for="lname" class="form-label">LAST NAME:</label>
-      <input type="text" class="form-control" id="lname" placeholder="Enter last name" name="lname" value="<?php echo isset($student['lname']) ? $student['lname'] : ''; ?>" >
+      <input type="text" class="form-control" id="lname" placeholder="Enter last name" name="lname"
+        value="<?php echo $student['lname']; ?>">
       <small id="lnameError" class="error"></small>
     </div>
     <div class="mb-3 mt-3">
       <label for="email" class="form-label">EMAIL:</label>
-      <input type="email" class="form-control" id="email" placeholder="Enter email" name="email" value="<?php echo isset($student['email']) ? $student['email'] : ''; ?>" >
+      <input type="email" class="form-control" id="email" placeholder="Enter email" name="email"
+        value="<?php echo $student['email']; ?>">
       <small id="emailError" class="error"></small>
     </div>
     <div class="mb-3">
       <label for="class" class="form-label">CLASS:</label>
-      <input type="text" class="form-control" id="class" placeholder="Enter class" name="class" value="<?php echo isset($student['class']) ? $student['class'] : ''; ?>" >
+      <input type="text" class="form-control" id="class" placeholder="Enter class" name="class"
+        value="<?php echo $student['class']; ?>">
       <small id="classError" class="error"></small>
     </div>
-    <button type="submit" class="btn btn-primary" id="updateButton">UPDATE STUDENT</button>
-    <small id="resultMessage"></small>
-  </form> 
-
+    <button type="submit" class="btn btn-primary">UPDATE STUDENT</button>
+  </form>
+  <div id="resultMessage"></div>
   <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
       $("#stdform").validate({
         rules: {
-          fname: { required: true, minlength: 2 },
-          lname: { required: true, minlength: 2 },
-          email: { required: true, minlength: 2 },
-          class: { required: true, minlength: 2 }
+          fname: {
+            required: true,
+            minlength: 2
+          },
+          lname: {
+            required: true,
+            minlength: 2
+          },
+          email: {
+            required: true,
+            minlength: 2
+          },
+          class: {
+            required: true,
+            minlength: 2
+          }
         },
         messages: {
-          fname: { required: "Please enter student's first name.", minlength: "First name must be at least 2 characters" },
-          lname: { required: "Please enter student's last name.", minlength: "Last name must be at least 2 characters" },
-          email: { required: "Please enter student's email.", minlength: "Email must be at least 2 characters" },
-          class: { required: "Please enter student's class.", minlength: "Class must be at least 2 characters" }
-        }
-      });
+          fname: {
+            required: "please enter student first name..",
+            minlength: "first name must consist of at least 2 characters"
+          },
+          lname: {
+            required: "please enter student last name..",
+            minlength: "last name must consist of at least 2 characters"
+          },
+          email: {
+            required: "please enter student email..",
+            minlength: "email must consist of at least 2 characters"
+          },
+          class: {
+            required: "please enter student class..",
+            minlength: "class must consist of at least 2 characters"
+          }
+        },
+        submitHandler: function (form) {
 
-      $('#updateButton').click(function(e) 
-      {
-        e.preventDefault();
-        if ($("#stdform").valid()) {  
+          var id = $("#id").val();
           $.ajax({
-            url: "update.php",  
-            type: "POST",
-            data: {
-              fname: $("#fname").val(),
-              lname: $("#lname").val(),
-              email: $("#email").val(),
-              class: $("#class").val()
+            url: 'edit.php',
+            type: 'POST',
+            data: $(form).serialize(),
+            dataType: 'json',
+            success: function (response) {
+              if (response.status === 'success') {
+                $("#resultMessage").html('<div class="alert alert-success">' + response.message + '</div>');
+                setTimeout(function () {
+                  window.location.href = 'index.php';
+                }, 2000);
+              } else {
+                $("#resultMessage").html('<div class="alert alert-danger">' + response.message + '</div>');
+              }
             },
-            success: function(response) {
-              $('#resultMessage').text("Student data updated successfully.").css('color', 'green');
-              setTimeout(function() {
-                window.location.href = "index.php";
-              }, 2000);
-            },
-            error: function(xhr, status, error) {
-              $('#resultMessage').text("Error updating data: " + error).css('color', 'red');
+            error: function () {
+              $("#resultMessage").html('<div class="alert alert-danger">Error occurred while updating data.</div>');
             }
           });
         }
       });
     });
   </script>
+
 </body>
 
 </html>

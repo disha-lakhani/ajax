@@ -1,14 +1,5 @@
 <?php
-$server = "localhost";
-$username = "root";
-$password = "";
-$db = "php_db";
-
-$conn = mysqli_connect($server, $username, $password, $db);
-
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+require 'db.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["id"])) {
     $studentId = intval($_POST["id"]);

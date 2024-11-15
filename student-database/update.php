@@ -1,40 +1,30 @@
 <?php
 
-include 'db.php';
-$id = $_GET['id'];
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $fname = $_POST['fname'];
-    $image = $_FILES['image']['name'];
-    $email = $_POST['email'];
-    $contact = $_POST['contact'];
-    $course = $_POST['course'];
-    $gender = $_POST['gender'];
-    $address = $_POST['address'];
-    $hobbies = isset($_POST['hobbie']) ? implode(", ", $_POST['hobbie']) : "";
-    $password = $_POST['password'];
+require 'db.php';
 
-    $sql = "UPDATE student SET 
-                fname='$fname', 
-                email='$email', 
-                contact='$contact', 
-                course='$course', 
-                gender='$gender', 
-                address='$address', 
-                hobbies='$hobbies', 
-                password='$password' 
-            WHERE id='$id'";
-    if (mysqli_query($conn, $sql)) {
-        header("location:display.php");
-        exit();
-    } else {
-        echo "error : " . $sql . "<br>" . mysqli_error($conn);
-    }
-} else {
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+    $id = (int) $_GET['id'];
     $sql = "SELECT * FROM student WHERE id=$id";
     $result = mysqli_query($conn, $sql);
-    $std = mysqli_fetch_assoc($result);
-}
-mysqli_close($conn);
+  
+    if (!$result) {
+      die("Query failed: " . mysqli_error($conn));
+    }
+  
+    if (mysqli_num_rows($result) > 0) {
+      $student = mysqli_fetch_assoc($result);
+    } else {
+      header("location:display.php");
+      exit();
+    }
+  
+  } else {
+    header("location:display.php");
+    exit();
+  }
+  
+  mysqli_close($conn);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -129,36 +119,30 @@ mysqli_close($conn);
     <div class="card bg-light">
         <article class="card-body " style="max-width: 1000px;">
             <h4 class="card-title mt-2 mb-3 text-center"> UPDATE DETAILS</h4>
-            <form action="" method="post" id="stddata" enctype="multipart/form-data">
+            <form id="stddata" enctype="multipart/form-data">
                 <div class="form-group input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                     </div>
-                    <input name="fname" id="fname" value="<?php echo $std['fname']; ?>" class="form-control" placeholder="First name" type="text">
+                    <input type="hidden" name="id" id="id" value="<?php echo $student['id']; ?>">
+                    <input name="fname" id="fname" value="<?php echo $student['fname']; ?>" class="form-control"
+                        placeholder="First name" type="text">
                 </div>
                 <span id="demo1" style="color: red;">Please enter Full name</span>
-                <!-- <div class="form-group input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"> <i class="fas fa-image"></i> </span>
-                    </div>
-                    <input type="file" name="image" id="image" class="form-control">
-                    <?php if (!empty($std['image'])): ?>
-                        <img src="uploads/<?php echo $std['image']; ?>" alt="Current Image" width="100">
-                    <?php endif; ?>
-                </div>
-                <span id="demo2" style="color: red;">Please select the image</span> -->
                 <div class="form-group input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
                     </div>
-                    <input name="email" id="email" value="<?php echo $std['email']; ?>" class="form-control" placeholder="Email address" type="text">
+                    <input name="email" id="email" value="<?php echo $student['email']; ?>" class="form-control"
+                        placeholder="Email address" type="text">
                 </div>
                 <span id="demo3" style="color: red;">Please enter valid email address</span>
                 <div class="form-group input-group">
                     <div class="input-group-prepend">
                         <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
                     </div>
-                    <input name="contact" id="contact" value="<?php echo $std['contact']; ?>" class="form-control" placeholder="Phone number" type="text">
+                    <input name="contact" id="contact" value="<?php echo $student['contact']; ?>" class="form-control"
+                        placeholder="Phone number" type="text">
                 </div>
                 <span id="demo4" style="color: red;">Please enter mobile number (only 10 digits allowed)</span>
                 <div class="form-group input-group">
@@ -167,9 +151,12 @@ mysqli_close($conn);
                     </div>
                     <select class="form-control" id="course" name="course">
                         <option value="">select the course</option>
-                        <option value="BCA" <?php if ($std['course'] == 'BCA') echo 'selected'; ?>>BCA</option>
-                        <option value="BCOM" <?php if ($std['course'] == 'BCOM') echo 'selected'; ?>>BCOM</option>
-                        <option value="BBA" <?php if ($std['course'] == 'BBA') echo 'selected'; ?>>BBA</option>
+                        <option value="BCA" <?php if ($student['course'] == 'BCA')
+                            echo 'selected'; ?>>BCA</option>
+                        <option value="BCOM" <?php if ($student['course'] == 'BCOM')
+                            echo 'selected'; ?>>BCOM</option>
+                        <option value="BBA" <?php if ($student['course'] == 'BBA')
+                            echo 'selected'; ?>>BBA</option>
                     </select>
                 </div>
                 <span id="demo5" style="color: red;">Please select the course..</span>
@@ -179,11 +166,14 @@ mysqli_close($conn);
                     </div>
                     <div class="form-control">
                         <label class="radio-inline" for="maleGender">
-                            <input type="radio" name="gender" id="male" value="male" <?php if ($std['gender'] == 'male') echo 'checked'; ?>> Male</label>
+                            <input type="radio" name="gender" id="male" value="male" <?php if ($student['gender'] == 'male')
+                                echo 'checked'; ?>> Male</label>
                         <label class="radio-inline" for="femaleGender">
-                            <input type="radio" name="gender" id="female" value="female" <?php if ($std['gender'] == 'female') echo 'checked'; ?>> Female</label>
+                            <input type="radio" name="gender" id="female" value="female" <?php if ($student['gender'] == 'female')
+                                echo 'checked'; ?>> Female</label>
                         <label class="radio-inline" for="otherGender">
-                            <input type="radio" name="gender" id="other" value="other" <?php if ($std['gender'] == 'other') echo 'checked'; ?>> Other</label>
+                            <input type="radio" name="gender" id="other" value="other" <?php if ($student['gender'] == 'other')
+                                echo 'checked'; ?>> Other</label>
                     </div>
                 </div>
                 <span id="demo6" style="color: red;">Please select gender..</span>
@@ -191,7 +181,8 @@ mysqli_close($conn);
                     <div class="input-group-prepend">
                         <span class="input-group-text"> <i class="fas fa-home"></i> </span>
                     </div>
-                    <textarea id="address" name="address" class="form-control" rows="3" placeholder="Enter your current address.."><?php echo $std['address']; ?></textarea>
+                    <textarea id="address" name="address" class="form-control" rows="3"
+                        placeholder="Enter your current address.."><?php echo $student['address']; ?></textarea>
                 </div>
                 <span id="demo7" style="color: red;">Please enter your address..</span>
                 <div class="form-group input-group">
@@ -201,16 +192,19 @@ mysqli_close($conn);
                     <div class="form-control">
                         <?php
 
-                        $hobbies = explode(", ", $std['hobbies']);
+                        $hobbies = explode(", ", $student['hobbies']);
                         ?>
                         <label class="checkbox-inline">
-                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Reading" <?php if (in_array("Reading", $hobbies)) echo 'checked'; ?>> Reading
+                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Reading" <?php if (in_array("Reading", $hobbies))
+                                echo 'checked'; ?>> Reading
                         </label>
                         <label class="checkbox-inline">
-                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Lerning" <?php if (in_array("Lerning", $hobbies)) echo 'checked'; ?>> Lerning
+                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Lerning" <?php if (in_array("Lerning", $hobbies))
+                                echo 'checked'; ?>> Lerning
                         </label>
                         <label class="checkbox-inline">
-                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Writting" <?php if (in_array("Writting", $hobbies)) echo 'checked'; ?>> Writting
+                            <input type="checkbox" name="hobbie[]" id="hobbies" value="Writting" <?php if (in_array("Writting", $hobbies))
+                                echo 'checked'; ?>> Writting
                         </label>
                     </div>
 
@@ -220,11 +214,12 @@ mysqli_close($conn);
                     <div class="input-group-prepend">
                         <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                     </div>
-                    <input name="password" id="password" class="form-control" placeholder="Create password" type="text" value="<?php echo $std['password']; ?>">
+                    <input name="password" id="password" class="form-control" placeholder="Create password" type="text"
+                        value="<?php echo $student['password']; ?>">
                 </div>
                 <span id="demo9" style="color: red;">Please enter password..</span>
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-block">UPDATE</button>
+                    <button type="button" id="reg" class="btn btn-primary btn-block">UPDATE</button>
                 </div>
             </form>
             <p class="divider-text">
@@ -232,14 +227,15 @@ mysqli_close($conn);
             </p>
             <p>
                 <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-google"></i>   Login via Google</a>
-                <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via Facebook</a>
+                <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via
+                    Facebook</a>
             </p>
         </article>
     </div>
 </body>
 <!-- validation -->
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $("#demo1").hide();
         $("#demo2").hide();
         $("#demo3").hide();
@@ -250,7 +246,7 @@ mysqli_close($conn);
         $("#demo8").hide();
         $("#demo9").hide();
 
-        $("#stddata").submit(function(e) {
+        $("#reg").click(function (e) {
             var isValid = true;
 
             function showError(elementId, inputGroup) {
@@ -271,18 +267,6 @@ mysqli_close($conn);
             } else {
                 hideError("#demo1", "#fname");
             }
-            //image Validation
-            // var image = $("#image").val();
-            // var validExtensions =/(\.jpg|\.jpeg|\.png|\.gif|\.webp|\.jfif)$/i;
-            // if (image === "") {
-            //     showError("#demo2", "#image");
-            // } else if (!validExtensions.exec(image)) {
-            //     showError("#demo2", "#image");
-            //     alert("Please upload an image in one of the following formats: .jpg, .jpeg, .webp, .jfif");
-            // } else {
-            //     hideError("#demo2", "#image");
-            // }
-            // Email Validation
             var email = $("#email").val().trim();
             var emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
             if (!emailPattern.test(email)) {
@@ -340,10 +324,26 @@ mysqli_close($conn);
                 hideError("#demo8", "#hobbies");
             }
 
-            // Prevent form submission if any field is invalid
-            if (!isValid) {
-                e.preventDefault();
-            }
+            if (isValid) {
+            $.ajax({
+                url: 'edit.php',
+                type: 'POST',
+                data: $("#stddata").serialize(),
+                success: function (response) {
+                    // Assuming `response` is JSON
+                    response = JSON.parse(response);
+                    if (response.status === 'success') {
+                        alert('Data updated successfully!');
+                        window.location.href = 'display.php';
+                    } else {
+                        alert('Update failed: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('Error occurred while updating data.');
+                }
+            });
+        }
         });
     });
 </script>

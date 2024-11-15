@@ -54,7 +54,35 @@ require 'log.php';
             </div>
         </div>
     </form>
+    <div id="message" class="mt-3"></div>
 </body>
+<script>
+$(document).ready(function() {
+    $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+            url: 'login.php',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.status === 'success') {
+                    $('#message').html('<div class="alert alert-success">' + response.message + '</div>');
+                    setTimeout(function() {
+                        window.location.href = response.redirect;
+                    }, 2000); 
+                } else {
+                    $('#message').html('<div class="alert alert-danger">' + response.message + '</div>');
+                }
+            },
+            error: function() {
+                $('#message').html('<div class="alert alert-danger">An error occurred while processing the request.</div>');
+            }
+        });
+    });
+});
+</script>
 <script src="log.js"></script>
 
 </html>

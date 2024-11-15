@@ -113,6 +113,12 @@
         label {
             margin-bottom: 0;
         }
+
+        #successmes {
+            color: green;
+            text-align: center;
+
+        }
     </style>
 </head>
 
@@ -125,13 +131,15 @@
             <div class="col-md-6 right">
                 <div class="card bg-light">
                     <article class="card-body " style="max-width: 1000px;">
+                        <div id="successmes"></div>
                         <h4 class="card-title mt-2 mb-3 text-center"> ADD STUDENT DETAILS</h4>
-                        <form action="insert.php" method="post" id="stddata" enctype="multipart/form-data">
+                        <form id="stddata" enctype="multipart/form-data">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                                 </div>
-                                <input name="fname" id="fname" class="form-control" placeholder="First name" type="text">
+                                <input name="fname" id="fname" class="form-control" placeholder="First name"
+                                    type="text">
                             </div>
                             <span id="demo1" style="color: red;">Please enter Full name</span>
                             <div class="form-group input-group">
@@ -145,16 +153,19 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
                                 </div>
-                                <input name="email" id="email" class="form-control" placeholder="Email address" type="text">
+                                <input name="email" id="email" class="form-control" placeholder="Email address"
+                                    type="text">
                             </div>
                             <span id="demo3" style="color: red;">Please enter valid email address</span>
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
                                 </div>
-                                <input name="contact" id="contact" class="form-control" placeholder="Phone number" type="text">
+                                <input name="contact" id="contact" class="form-control" placeholder="Phone number"
+                                    type="text">
                             </div>
-                            <span id="demo4" style="color: red;">Please enter mobile number (only 10 digits allowed)</span>
+                            <span id="demo4" style="color: red;">Please enter mobile number (only 10 digits
+                                allowed)</span>
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-building"></i> </span>
@@ -185,7 +196,8 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fas fa-home"></i> </span>
                                 </div>
-                                <textarea id="address" name="address" class="form-control" rows="3" placeholder="Enter your current address.."></textarea>
+                                <textarea id="address" name="address" class="form-control" rows="3"
+                                    placeholder="Enter your current address.."></textarea>
                             </div>
                             <span id="demo7" style="color: red;">Please enter your address..</span>
                             <div class="form-group input-group">
@@ -210,19 +222,22 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                                 </div>
-                                <input name="password" id="password" class="form-control" placeholder="Create password" type="password">
+                                <input name="password" id="password" class="form-control" placeholder="Create password"
+                                    type="password">
                             </div>
                             <span id="demo9" style="color: red;">Please enter password..</span>
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-block">REGISTER</button>
+                                <button type="button" id="reg" class="btn btn-primary btn-block">REGISTER</button>
                             </div>
                         </form>
                         <p class="divider-text">
                             <span class="bg-light">OR</span>
                         </p>
                         <p>
-                            <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-google"></i>   Login via Google</a>
-                            <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via Facebook</a>
+                            <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-google"></i>   Login via
+                                Google</a>
+                            <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via
+                                Facebook</a>
                         </p>
                     </article>
                 </div>
@@ -234,7 +249,7 @@
 
     <!-- validation -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("#demo1").hide();
             $("#demo2").hide();
             $("#demo3").hide();
@@ -245,7 +260,7 @@
             $("#demo8").hide();
             $("#demo9").hide();
 
-            $("#stddata").submit(function(e) {
+            $("#reg").click(function (e) {
                 var isValid = true;
 
                 function showError(elementId, inputGroup) {
@@ -268,15 +283,15 @@
                 }
                 //image Validation
                 var image = $("#image").val();
-            var validExtensions = /(\.jpg|\.jpeg|\.png|\.gif|\.webp|\.jfif)$/i;
-            if (image === "") {
-                showError("#demo2", "#image");
-            } else if (!validExtensions.exec(image)) {
-                showError("#demo2", "#image");
-                alert("Please upload an image in one of the following formats: .jpg, .jpeg, .webp, .jfif");
-            } else {
-                hideError("#demo2", "#image");
-            }
+                var validExtensions = /(\.jpg|\.jpeg|\.png|\.gif|\.webp|\.jfif)$/i;
+                if (image === "") {
+                    showError("#demo2", "#image");
+                } else if (!validExtensions.exec(image)) {
+                    showError("#demo2", "#image");
+                    alert("Please upload an image in one of the following formats: .jpg, .jpeg, .webp, .jfif");
+                } else {
+                    hideError("#demo2", "#image");
+                }
                 // Email Validation
                 var email = $("#email").val().trim();
                 var emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
@@ -320,7 +335,7 @@
                 } else {
                     hideError("#demo9", "#password");
                 }
-               // address Validation
+                // address Validation
                 var address = $("#address").val().trim();
                 if (address === "") {
                     showError("#demo7", "#address");
@@ -335,9 +350,38 @@
                     hideError("#demo8", "#hobbies");
                 }
 
-                // Prevent form submission if any field is invalid
-                if (!isValid) {
-                    e.preventDefault();
+
+
+
+
+
+
+                if (isValid) {
+
+                    let stddata = document.getElementById("stddata");
+                    let fd = new FormData(stddata);
+                    $.ajax({
+                        url: "insert.php",
+                        type: "POST",
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.status === "success") {
+                                $("#successmes").text(response.message);
+                                $("#stddata")[0].reset();
+                                setTimeout(function () {
+                                    window.location.href = "display.php";
+                                }, 1000);
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("An error occurred: " + xhr.responseText);
+                        }
+                    });
                 }
             });
         });

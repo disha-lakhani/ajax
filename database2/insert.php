@@ -1,14 +1,6 @@
 <?php 
-    $server="localhost";
-    $username="root";
-    $password="";
-    $db="php_db";
-
-    $conn=mysqli_connect($server,$username,$password,$db);
-
-    if(!$conn){
-        die("connection failed : ".mysqli_connect_error());
-    }
+    require 'db.php';
+    
     if($_SERVER["REQUEST_METHOD"]=="POST"){
         $fname=$_POST['fname'];
         $lname=$_POST['lname'];
@@ -146,7 +138,7 @@
               $("#stdform")[0].reset();
               setTimeout(function() {
                 window.location.href = "index.php";
-              }, 5000);
+              }, 3000);
             } else {
               $("#responseMessage").html("<p style='color:red;'>" + response.message + "</p>");
             }
