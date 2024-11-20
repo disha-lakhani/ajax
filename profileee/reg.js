@@ -105,9 +105,31 @@ $(document).ready(function() {
             hideError("#demo9", "#test");
         }
 
-        // Prevent form submission if any field is invalid
-        if (!isValid) {
-            e.preventDefault();
-        }
+        if (!isValid) return;
+
+        let formData = new FormData(this);
+
+        // AJAX request
+        $.ajax({
+            url: 'reg.php', 
+            type: 'POST',
+            data: formData,
+            contentType: false, 
+            processData: false, 
+            success: function (response) {
+                if (response.success) {
+                    alert('Registration successful!');
+                    window.location.href = 'login.php'; 
+                } else {
+                    alert('Registration failed: ' + response.error);
+                }
+            },
+            error: function (xhr, status, error) {
+                alert('An error occurred: ' + error);
+            },
+        });
+
+
+
     });
 })

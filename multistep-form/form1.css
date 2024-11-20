@@ -12,7 +12,16 @@
     background: #6441A5; 
     background: -webkit-linear-gradient(to left, #6441A5, #2a0845); 
 } */
-
+.checkbox-inline {
+    position: relative;
+    display: inline-block;
+    padding-left: 20px;
+    margin-bottom: 0;
+    font-weight: 400;
+    vertical-align: middle;
+    cursor: pointer;
+    padding-right: 30px !important;
+}
 body {
     font-family: montserrat, arial, verdana;
     background-color:burlywood !important;

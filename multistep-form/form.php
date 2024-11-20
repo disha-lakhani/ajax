@@ -14,12 +14,17 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="form1.css">
+
+
+
+
 </head>
 
 <body>
+    <div id="responseMessage"></div>
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form id="msform" action="insert.php" method="post" enctype="multipart/form-data">
+            <form id="msform" action="" method="post" enctype="multipart/form-data">
                 <!-- progressbar -->
                 <ul id="progressbar">
                     <li class="active" id="account">Personal Details</li>
@@ -32,11 +37,13 @@
                     <h3 class="fs-subtitle">Tell us something more about you</h3>
 
                     <label for="fname" class="name">First Name:</label>
-                    <input type="text" class="input" name="fname" id="fname" placeholder=" First Name" autocomplete="given-name" />
+                    <input type="text" class="input" name="fname" id="fname" placeholder=" First Name"
+                        autocomplete="given-name" />
                     <span id="demo1" class="error" style="color:red;">***enter your firstname***</span>
 
                     <label for="lname" class="name">Last Name:</label>
-                    <input type="text" class="input" name="lname" id="lname" placeholder=" Last Name" autocomplete="family-name" />
+                    <input type="text" class="input" name="lname" id="lname" placeholder=" Last Name"
+                        autocomplete="family-name" />
                     <span id="demo2" class="error" style="color:red;">***enter your lastname***</span>
 
                     <label for="field" class="name">Course:</label>
@@ -74,15 +81,35 @@
                     <h3 class="fs-subtitle">Provide your contact details</h3>
 
                     <label for="contact" class="name">Contact:</label>
-                    <input type="tel" class="input" name="contact" id="contact" placeholder="Please enter your phone number" autocomplete="tel" />
+                    <input type="tel" class="input" name="contact" id="contact"
+                        placeholder="Please enter your phone number" autocomplete="tel" />
                     <span id="demo6" class="error" style="color:red;">***enter your contact***</span>
 
-                    <label for="email" class="name">Email:</label>
-                    <input type="email" class="input" name="email" id="email" placeholder="Please enter your email address" autocomplete="email" />
-                    <span id="demo7" class="error" style="color:red;">***enter your Email***</span>
+                    <label for="hobbie" class="name">Hobbies:</label><br>
+                    <div class="gender-options input">
+                        <label class="checkbox-inline ">
+                            <input type="checkbox" name="hobbie[]" value="Reading"> Reading
+                        </label>
+                        <label class="checkbox-inline ">
+                            <input type="checkbox" name="hobbie[]" value="Learning"> Learning
+                        </label>
+                        <label class="checkbox-inline ">
+                            <input type="checkbox" name="hobbie[]" value="Writing"> Writing
+                        </label>
+                        <label class="checkbox-inline ">
+                            <input type="checkbox" name="hobbie[]" value="Playing"> Playing
+                        </label>
+                        <label class="checkbox-inline ">
+                            <input type="checkbox" name="hobbie[]" value="Singing"> Singing
+                        </label>
+                    
+                    </div>
+                    <span id="demo7" class="error" style="color:red;">***select at least one hobbie***</span>
+
 
                     <label for="address" class="name">Address:</label>
-                    <textarea class="input" name="address" id="address" placeholder="Please enter your address" autocomplete="address-line1"></textarea>
+                    <textarea class="input" name="address" id="address" placeholder="Please enter your address"
+                        autocomplete="address-line1"></textarea>
                     <span id="demo8" class="error" style="color:red;">***enter your Address***</span>
 
                     <label for="city" class="name">City:</label>
@@ -91,7 +118,7 @@
                         <option value="Surat">Surat</option>
                         <option value="Mumbai">Mumbai</option>
                         <option value="Udaipur">Udaipur</option>
-                        <option value="Bhavnagar">Bhavnagar</option>
+                       
                         <option value="Pune">Pune</option>
                         <option value="Jaipur">Jaipur</option>
                     </select>
@@ -119,28 +146,37 @@
                     <label for="image" class="name">Profile Image:</label>
                     <input type="file" class="input" name="image" id="image" />
                     <span id="demo11" class="error" style="color:red;">***upload profile picture***</span>
+                    <!-- email -->
+                    <label for="email" class="name">Email:</label>
+                    <input type="email" class="input" name="email" id="email"
+                        placeholder="Please enter your email address" autocomplete="email" />
+                    <span id="demo12" class="error" style="color:red;">***enter your Email***</span>
 
                     <!-- Username -->
                     <label for="username" class="name">Username:</label>
-                    <input type="text" class="input" name="username" id="username" placeholder="Enter your username" autocomplete="username" />
-                    <span id="demo12" class="error" style="color:red;">***enter your Username***</span>
+                    <input type="text" class="input" name="username" id="username" placeholder="Enter your username"
+                        autocomplete="username" />
+                    <span id="demo13" class="error" style="color:red;">***enter your Username***</span>
 
                     <!-- Password -->
                     <label for="password" class="name">Password:</label>
-                    <input type="password" class="input" name="password" id="password" placeholder="Enter your password" autocomplete="new-password"  />
-                    <span id="demo13" class="error" style="color:red;">***enter your password***</span>
+                    <input type="password" class="input" name="password" id="password" placeholder="Enter your password"
+                        autocomplete="new-password" />
+                    <span id="demo14" class="error" style="color:red;">***enter your password***</span>
 
                     <!-- Confirm Password -->
                     <label for="confirmpassword" class="name">Confirm Password:</label>
-                    <input type="password" class="input" name="confirmpassword" id="confirmpassword" placeholder="Confirm your password" autocomplete="new-password"  />
-                    <span id="demo14" class="error" style="color:red;">***enter your confirm password***</span>
+                    <input type="password" class="input" name="confirmpassword" id="confirmpassword"
+                        placeholder="Confirm your password" autocomplete="new-password" />
+                    <span id="demo15" class="error" style="color:red;">***enter your confirm password***</span>
 
                     <!-- Terms and Conditions Checkbox -->
                     <div class="checkbox-container">
                         <input type="checkbox" name="terms" id="terms" />
-                        <label for="terms" class="terms-label">I agree to the <a href="#" target="_blank">Terms and Conditions</a></label>
+                        <label for="terms" class="terms-label">I agree to the <a href="#" target="_blank">Terms and
+                                Conditions</a></label>
                     </div>
-                    <span id="demo15" class="error" style="color:red;">***tick the checkbox first***</span>
+                    <span id="demo16" class="error" style="color:red;">***tick the checkbox first***</span>
 
                     <input type="button" name="previous" class="previous action-button-previous" value="Previous" />
                     <button type="submit" class="action-button submit-btn">Submit</button>
@@ -159,7 +195,41 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
     <!-- Custom JavaScript -->
-    <script src="form.js"></script>
+    <script src="form1.js"></script>
+
+    <script>
+        $("#msform").on("submit", function (event) {
+            event.preventDefault();
+
+            var formData = new FormData(this);
+            $.ajax({
+                url: "insert.php",
+                type: "POST",
+                data: formData,
+                dataType: "json",
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    if (response.status === "success") {
+                        $("#responseMessage").html("<p style='color:green;'>" + response.message + "</p>");
+                        $("#msform")[0].reset();
+
+                        setTimeout(function () {
+                            window.location.href = "display.php";
+                        }, 2000);
+                    } else {
+                        $("#responseMessage").html("<p style='color:red;'>" + response.message + "</p>");
+                    }
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.error("AJAX error:", textStatus, errorThrown);
+                    $("#responseMessage").html("<p style='color:red;'>An error occurred. Please try again later.</p>");
+                },
+            });
+        });
+
+
+    </script>
 </body>
 
 

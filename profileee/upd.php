@@ -25,6 +25,9 @@ if (isset($_POST['update'])) {
     $email = $_POST['email'];
     $gender = $_POST['gender'];
 
+    $response =[];
+    // $response = ['status' => 'success', 'message' => 'Profile updated successfully!'];
+
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['image']['tmp_name'];
         $fileName = $_FILES['image']['name'];
@@ -61,11 +64,15 @@ if (isset($_POST['update'])) {
     $update_sql = "UPDATE users SET fname = '$fname', lname = '$lname', email = '$email', city = '$city', gender = '$gender' WHERE id = '$id'";
 
     if ($conn->query($update_sql) === TRUE) {
-        $_SESSION['email'] = $email; 
-        echo "<script>alert('Profile updated successfully!'); window.location.href = 'profile.php';</script>";
+        $_SESSION['email'] = $email;
+        echo json_encode(['status' => 'success', 'message' => 'Profile updated successfully!']);
+        header('location:profile.php');
+        exit();
     } else {
-        echo "Error updating record: " . $conn->error;
+        echo json_encode(['status' => 'error', 'message' => 'Error updating record: ' . $conn->error]);
+        exit();
     }
+    
 }
 
 $conn->close();

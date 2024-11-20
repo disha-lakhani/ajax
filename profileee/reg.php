@@ -2,6 +2,8 @@
 session_start();
 include 'db.php';
 
+header('Content-Type: application/json');
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fname = $_POST['fname'];
     $lname = $_POST['lname'];
@@ -26,15 +28,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['error'] = "Sorry, there was an error uploading your file.";
         }
     }
-    if (!isset($_SESSION['error'])) {
-        $sql = "INSERT INTO users (fname, lname, email, gender, password, city, image) 
+
+    $sql = "INSERT INTO users (fname, lname, email, gender, password, city, image) 
                 VALUES ('$fname', '$lname', '$email', '$gender', '$password',  '$city', '$image')";
-        if (mysqli_query($conn, $sql)) {
-            header("Location: login.php");
-            exit();
-        } else {
-            $_SESSION['error'] = "Error: " . mysqli_error($conn);
-        }
+
+
+
+    if (mysqli_query($conn, $sql)) {
+        echo json_encode(['success' => true, 'message' => 'Registration successful']);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Database error: ' . mysqli_error($conn)]);
     }
 }
 mysqli_close($conn);

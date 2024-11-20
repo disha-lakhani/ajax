@@ -1,85 +1,74 @@
 <?php
+include 'db.php';
 session_start();
 
-include 'db.php';
+if (isset($_FILES['csv_file'])) {
+    $file = $_FILES['csv_file'];
+    $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
+    if ($fileExtension !== 'csv') {
+        echo json_encode(["status" => "error", "message" => "Please upload a valid CSV file."]);
+        exit();
+    }
 
-if (isset($_POST['import'])) {
+    $allImported = true;
+    if (($handle = fopen($file['tmp_name'], 'r')) !== false) {
+        fgetcsv($handle);  // Skip the first line (header)
+        $rowNumber = 1;  // Start counting rows (skip header)
+        
+        while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+            $fname = mysqli_real_escape_string($conn, $data[0]);
+            $email = mysqli_real_escape_string($conn, $data[1]);
+            $contact = mysqli_real_escape_string($conn, $data[2]);
 
-    if ($_FILES['csv_file']['name']) {
-        $fileName = $_FILES['csv_file']['name'];
-        $fileTmpName = $_FILES['csv_file']['tmp_name'];
-        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
-
-        if ($fileExtension != 'csv') {
-            $_SESSION['error'] = "Please upload a valid CSV file.";
-            header("Location: csvform.php");
-            exit;
-        }
-
-        $file = fopen($fileTmpName, "r");
-
-        $header = fgetcsv($file);
-
-        $allImported = true;
-        $rowNumber = 1; 
-        while (($data = fgetcsv($file, 1000, ",")) !== FALSE) {
-            $rowNumber++;
-
-            $fname = trim(mysqli_real_escape_string($conn, $data[0]));
-            $email = trim(mysqli_real_escape_string($conn, $data[1]));
-            $contact = trim(mysqli_real_escape_string($conn, $data[2]));
-
+            // Field validation
             if (empty($fname)) {
-                $_SESSION['error'] = "First name field is empty in row $rowNumber of the CSV file.";
+                echo json_encode(["status" => "error", "message" => "First name field is empty in row $rowNumber of the CSV file."]);
                 $allImported = false;
                 break;
             }
             if (empty($email)) {
-                $_SESSION['error'] = "Email field is empty in row $rowNumber of the CSV file.";
+                echo json_encode(["status" => "error", "message" => "Email field is empty in row $rowNumber of the CSV file."]);
                 $allImported = false;
                 break;
             }
             if (empty($contact)) {
-                $_SESSION['error'] = "Contact field is empty in row $rowNumber of the CSV file.";
+                echo json_encode(["status" => "error", "message" => "Contact field is empty in row $rowNumber of the CSV file."]);
                 $allImported = false;
                 break;
             }
 
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $_SESSION['error'] = "Invalid email format in row $rowNumber of the CSV file.";
+                echo json_encode(["status" => "error", "message" => "Invalid email format in row $rowNumber of the CSV file."]);
                 $allImported = false;
                 break;
             }
 
             if (!preg_match('/^[0-9]{10}$/', $contact)) {
-                $_SESSION['error'] = "Invalid contact number format in row $rowNumber of the CSV file.";
+                echo json_encode(["status" => "error", "message" => "Invalid contact number (only 10 digits
+                                allowed) in row $rowNumber of the CSV file."]);
                 $allImported = false;
                 break;
             }
 
-            $sql = "INSERT INTO students (fname, email, contact) VALUES ('$fname', '$email', '$contact')";
-            if (!$conn->query($sql)) {
-                $_SESSION['error'] = "Error importing data in row $rowNumber: " . $conn->error;
-                $allImported = false;
-                break;
+            // Insert data into database if no errors
+            if ($allImported) {
+                $query = "INSERT INTO students (fname, email, contact) VALUES ('$fname', '$email', '$contact')";
+                if (!mysqli_query($conn, $query)) {
+                    echo json_encode(["status" => "error", "message" => "Error importing data: " . mysqli_error($conn)]);
+                    fclose($handle);
+                    exit();
+                }
             }
+            $rowNumber++;
         }
-
-        fclose($file);
-
+        fclose($handle);
         if ($allImported) {
-            $_SESSION['success'] = "Data imported successfully!";
-            header("Location: display.php");
-            exit();
-        } else {
-            header("Location: csvform.php");
-            exit();
+            echo json_encode(["status" => "success", "message" => "Data imported successfully!"]);
         }
-
     } else {
-        $_SESSION['error'] = "No file uploaded.";
-        header("Location: csvform.php");
-        exit();
+        echo json_encode(["status" => "error", "message" => "Error opening file."]);
     }
+} else {
+    echo json_encode(["status" => "error", "message" => "No file selected."]);
 }
 ?>

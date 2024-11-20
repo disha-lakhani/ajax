@@ -7,7 +7,7 @@ $error = false;
 if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
     $targetDirectory = 'uploads/';
     $imagePath = $targetDirectory . basename($_FILES['image']['name']);
-    
+
     if (!is_dir($targetDirectory)) {
         mkdir($targetDirectory, 0755, true);
     }
@@ -28,25 +28,25 @@ $field = mysqli_real_escape_string($conn, $_POST['field']);
 $dob = mysqli_real_escape_string($conn, $_POST['dob']);
 $gender = mysqli_real_escape_string($conn, $_POST['gender']);
 $contact = mysqli_real_escape_string($conn, $_POST['contact']);
+$hobbie = isset($_POST['hobbie']) ? implode(',', $_POST['hobbie']) : '';
 $email = mysqli_real_escape_string($conn, $_POST['email']);
 $address = mysqli_real_escape_string($conn, $_POST['address']);
 $city = mysqli_real_escape_string($conn, $_POST['city']);
 $state = mysqli_real_escape_string($conn, $_POST['state']);
 $username = mysqli_real_escape_string($conn, $_POST['username']);
-$password = mysqli_real_escape_string($conn, $_POST['password']); 
+$password = mysqli_real_escape_string($conn, $_POST['password']);
 
 
 if (!$error) {
-    $sql = "INSERT INTO std (fname, lname, field, dob, gender, contact, email, address, city, state, image, username, password) 
-            VALUES ('$fname', '$lname', '$field', '$dob', '$gender', '$contact', '$email', '$address', '$city', '$state', '$imagePath', '$username', '$password')";
+    $sql = "INSERT INTO std (fname, lname, field, dob, gender, contact,hobbies,  address, city, state, image,email, username, password) 
+            VALUES ('$fname', '$lname', '$field', '$dob', '$gender', '$contact','$hobbie',  '$address', '$city', '$state', '$imagePath','$email', '$username', '$password')";
 
     if (mysqli_query($conn, $sql)) {
-        header("Location: display.php");
-        exit;
+        echo json_encode(["status" => "success", "message" => "Student data added successfully"]);
     } else {
-        echo "Error: " . mysqli_error($conn);
-        echo "<br>SQL Query: " . $sql;
+        echo json_encode(["status" => "error", "message" => "Error: " . mysqli_error($conn)]);
     }
+    exit();
 }
 
 

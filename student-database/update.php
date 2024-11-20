@@ -113,11 +113,17 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
     label {
         margin-bottom: 0;
     }
+    #successmes {
+            color: green;
+            text-align: center;
+
+        }
 </style>
 
 <body>
     <div class="card bg-light">
         <article class="card-body " style="max-width: 1000px;">
+        <div id="successmes"></div>
             <h4 class="card-title mt-2 mb-3 text-center"> UPDATE DETAILS</h4>
             <form id="stddata" enctype="multipart/form-data">
                 <div class="form-group input-group">
@@ -333,8 +339,10 @@ if (isset($_GET['id']) && !empty($_GET['id'])) {
                     // Assuming `response` is JSON
                     response = JSON.parse(response);
                     if (response.status === 'success') {
-                        alert('Data updated successfully!');
-                        window.location.href = 'display.php';
+                        $("#successmes").text(response.message);
+                        setTimeout(function () {
+                                    window.location.href = "display.php";
+                                }, 1000);
                     } else {
                         alert('Update failed: ' + response.message);
                     }

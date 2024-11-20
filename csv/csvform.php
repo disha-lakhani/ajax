@@ -1,21 +1,22 @@
 <?php
 include 'db.php';
 
-session_start(); 
+session_start();
 
 if (isset($_SESSION['success'])) {
     echo '<div class="success">' . $_SESSION['success'] . '</div>';
-    unset($_SESSION['success']); 
+    unset($_SESSION['success']);
 }
 
 if (isset($_SESSION['error'])) {
     echo '<div class="error">' . $_SESSION['error'] . '</div>';
-    unset($_SESSION['error']); 
+    unset($_SESSION['error']);
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,30 +44,76 @@ if (isset($_SESSION['error'])) {
 
         .download-link:hover {
             background-color: #0056b3;
-            color:white;
-            
+            color: white;
         }
     </style>
 </head>
+
 <body>
 
-<div class="container mt-5">
-    <h2 class="text-center">Import Student Data from CSV</h2>
+    <div class="container mt-5">
+        <h2 class="text-center">Import Student Data from CSV</h2>
 
-    <form action="import.php" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="csv_file">Choose CSV File</label>
-            <input type="file" class="form-control" name="csv_file" id="csv_file">
-        </div>
-        <button type="submit" name="import" class="btn btn-primary">Import CSV</button>
-        
-        <!-- Link to download demo CSV file -->
-        <a href="book2.csv" class="download-link" download>Download Demo CSV</a>
-    </form>
-</div>
+        <form id="importForm" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="csv_file">Choose CSV File</label>
+                <input type="file" class="form-control" name="csv_file" id="csv_file">
+            </div>
+            <button type="submit" name="import" id="import" class="btn btn-primary">Import CSV</button>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+            <!-- Link to download demo CSV file -->
+            <a href="book2.csv" class="download-link" download>Download Demo CSV</a>
+        </form>
+
+        <!-- Response messages -->
+        <div id="resultMessage"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#import').click(function (event) {
+                event.preventDefault();
+
+                var fileInput = $('#csv_file');
+                if (fileInput.val() === '') {
+                    
+                    $('#resultMessage').html('<div class="error">Please select a CSV file.</div>');
+                    return; 
+                }
+
+
+
+                let myform = document.getElementById("importForm");
+                let fd = new FormData(myform);
+
+                $.ajax({
+                    url: 'import.php',
+                    type: 'POST',
+                    data: fd,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        var data = JSON.parse(response);
+                        if (data.status == 'success') {
+                            $('#resultMessage').html('<div class="success">' + data.message + '</div>');
+                            setTimeout(function () {
+                                window.location.href = "display.php";
+                            }, 1000);
+                        } else {
+                            $('#resultMessage').html('<div class="error">' + data.message + '</div>');
+                        }
+                    },
+                    error: function () {
+                        $('#resultMessage').html('<div class="error">An error occurred while processing the file.</div>');
+                    }
+                });
+            });
+        });
+    </script>
 
 </body>
+
 </html>

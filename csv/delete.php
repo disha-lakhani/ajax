@@ -2,16 +2,25 @@
 
 include 'db.php';
 
-$id=$_GET['id'];
+header('Content-Type: application/json');
 
-$sql="DELETE FROM students WHERE id=$id";
+$response = ["status" => "error", "message" => "Invalid request"];
 
-if(mysqli_query($conn,$sql)){
-    header("location:display.php");
-    exit();
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["id"])) {
+    $studentId = intval($_POST["id"]);
+    if ($studentId > 0) {
+        $sql = "DELETE FROM students WHERE id=$studentId";
+
+        if (mysqli_query($conn, $sql)) {
+            $response = ["status" => "success", "message" => "student deleted successfully"];
+        } else {
+            $response = ["status" => "error", "message" => "Error deleting student: " . mysqli_error($conn)];
+        }
+    }
+    else {
+        $response["message"] = "Invalid student ID";
+    }
 }
-else{
-    echo "error : ".$sql."<br>".mysqli_error($conn);
-}
-
+mysqli_close($conn);
+echo json_encode($response);
 ?>

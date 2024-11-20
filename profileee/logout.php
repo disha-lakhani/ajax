@@ -1,6 +1,8 @@
 <?php
 session_start();
+
+session_unset();
 session_destroy();
-header('Location: login.php');
-exit();
+
+echo json_encode(["message" => "Logged out successfully"]);
 ?>

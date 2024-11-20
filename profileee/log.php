@@ -2,17 +2,36 @@
 session_start();
 include 'db.php';
 
-function displayError()
-{
-    if (isset($_SESSION['error'])) {
-        echo '<div class="alert alert-danger mt-3">' . $_SESSION['error'] . '</div>';
-        unset($_SESSION['error']);
-    }
+
+
+
+$response = [];
+
+if (isset($_SESSION['id'])) {
+    $response = [
+        'status' => 'already_logged_in',
+        'message' => 'You are already logged in.'
+     
+    ];
+    echo json_encode($response);
+    header('Location: profile.php');
+    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = $_POST['email'];
     $password = $_POST['password'];
+
+
+    if (empty($email) || empty($password)) {
+        $response = [
+            'status' => 'error',
+            'message' => 'Email and password are required.'
+        ];
+        echo json_encode($response);
+        exit();
+    }
+
 
     $sql = "SELECT * FROM users WHERE email='$email'";
 
@@ -37,27 +56,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     setcookie("userpassword", "", time() - 3600);
                 }
             }
-//             header('location:profile.php');
-//             exit();
-//         } else {
-//             $_SESSION['error'] = 'Invalid email or password.';
-//             header('location: login.php');
-//             exit();
-//         }
-//     } else {
-//         $_SESSION['error'] = 'User does not exist, please register first.';
-//         header('location: login.php');
-//         exit();
-//     }
-// }
-// mysqli_close($conn)
-echo json_encode(["status" => "success", "message" => "Login successful! Redirecting...", "redirect" => "profile.php"]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Invalid email or password."]);
+            $response = [
+                'status' => 'success',
+                'message' => 'Login successful.',
+                'redirect' => 'profile.php'
+            ];
+        } else {
+            $response = [
+                'status' => 'error',
+                'message' => 'Invalid email or password.'
+               
+            ];
+        }
+    } else {
+        $response = [
+            'status' => 'error',
+            'message' => 'User does not exist, please register first.'
+            
+        ];
+    }
 }
-} else {
-echo json_encode(["status" => "error", "message" => "User does not exist, please register first."]);
-}
-}
-mysqli_close($conn);
+echo json_encode($response);
+mysqli_close($conn)
+
 ?>

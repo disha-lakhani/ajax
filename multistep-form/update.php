@@ -1,50 +1,85 @@
 <?php
-
 require 'db.php';
-$id = $_GET['id'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $fname = $_POST['fname'];
-    $lname = $_POST['lname'];
-    $field = $_POST['field'];
-    $dob = $_POST['dob'];
-    $gender = $_POST['gender'];
-    $contact = $_POST['contact'];
-    $email = $_POST['email'];
-    $address = $_POST['address'];
-    $city = $_POST['city'];
-    $state = $_POST['state'];
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+if (isset($_GET['id']) && !empty($_GET['id'])) {
+    $id = (int) $_GET['id'];
+
+    $sql = "SELECT * FROM std WHERE id = $id";
+    $result = mysqli_query($conn, $sql);
+
+    if (!$result || mysqli_num_rows($result) == 0) {
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            echo json_encode(['success' => false, 'message' => 'ID not found or invalid.']);
+        } else {
+            echo "ID not found or invalid.";
+        }
+        exit();
+    }
+
+    $student = mysqli_fetch_assoc($result);
+}
+//  else {
+//     if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+//         echo json_encode(['success' => false, 'message' => 'Invalid ID.']);
+//     } else {
+//         echo "Invalid ID.";
+//     }
+//     exit();
+// }
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = (int) $_POST['id'];
+    $fname = mysqli_real_escape_string($conn, $_POST['fname']);
+    $lname = mysqli_real_escape_string($conn, $_POST['lname']);
+    $field = mysqli_real_escape_string($conn, $_POST['field']);
+    $dob = mysqli_real_escape_string($conn, $_POST['dob']);
+    $gender = mysqli_real_escape_string($conn, $_POST['gender']);
+    $contact = mysqli_real_escape_string($conn, $_POST['contact']);
+    $hobbies = isset($_POST['hobbie']) ? implode(", ", $_POST['hobbie']) : "";
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $city = mysqli_real_escape_string($conn, $_POST['city']);
+    $state = mysqli_real_escape_string($conn, $_POST['state']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $username = mysqli_real_escape_string($conn, $_POST['username']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
 
     $sql = "UPDATE std SET
-    fname='$fname',
-    lname='$lname',
-    field='$field',
-    dob='$dob',
-    gender='$gender',
-    contact='$contact',
-    email='$email',
-    address='$address',
-    city='$city',
-    state='$state',
-    username='$username',
-    password='$password'
-    WHERE id='$id'";
+        fname='$fname',
+        lname='$lname',
+        field='$field',
+        dob='$dob',
+        gender='$gender',
+        contact='$contact',
+        hobbies='$hobbies',
+        address='$address',
+        city='$city',
+        state='$state',
+        email='$email',
+        username='$username',
+        password='$password'
+        WHERE id='$id'";
+
+
 
     if (mysqli_query($conn, $sql)) {
-        header("location:display.php");
-        exit();
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+            echo json_encode(['success' => true, 'message' => 'Data updated successfully!']);
+            exit();
+        } else {
+            header("Location: display.php");
+            exit();
+        }
     } else {
-        echo "error : " . $sql . "<br>" . mysqli_error($conn);
+        echo json_encode(['success' => false, 'message' => mysqli_error($conn)]);
+        exit();
     }
-} else {
-    $sql = "SELECT * from std WHERE id=$id";
-    $result = mysqli_query($conn, $sql);
-    $std = mysqli_fetch_assoc($result);
 }
+
 mysqli_close($conn);
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -64,8 +99,9 @@ mysqli_close($conn);
 <body>
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <form id="msform" action="" method="post" enctype="multipart/form-data">
-               
+            <form id="msform" action="update.php?id=<?php echo $student['id']; ?>" method="post"
+                enctype="multipart/form-data">
+                <input type="hidden" name="id" id="id" value="<?php echo $student['id']; ?>">
                 <ul id="progressbar">
                     <li class="active" id="account">Personal Details</li>
                     <li id="personal">Contact Information</li>
@@ -77,35 +113,46 @@ mysqli_close($conn);
                     <h3 class="fs-subtitle">Tell us something more about you</h3>
 
                     <label for="fname" class="name">First Name:</label>
-                    <input type="text" class="input" name="fname" id="fname" placeholder=" First Name" value="<?php echo $std['fname']; ?>" autocomplete="given-name" />
+                    <input type="text" class="input" name="fname" id="fname" placeholder=" First Name"
+                        value="<?php echo isset($student['fname']) ? $student['fname'] : ''; ?>"
+                        autocomplete="given-name" />
                     <span id="demo1" class="error" style="color:red;">***enter your firstname***</span>
 
                     <label for="lname" class="name">Last Name:</label>
-                    <input type="text" class="input" name="lname" id="lname" placeholder=" Last Name" value="<?php echo $std['lname']; ?>" autocomplete="family-name" />
+                    <input type="text" class="input" name="lname" id="lname" placeholder=" Last Name"
+                        value="<?php echo isset($student['lname']) ? $student['lname'] : ''; ?>"
+                        autocomplete="family-name" />
                     <span id="demo2" class="error" style="color:red;">***enter your lastname***</span>
                     <label for="field" class="name">Course:</label>
                     <select name="field" class="input" id="field" autocomplete="off">
                         <option value="">Select Course</option>
-                        <option value="BBA" <?php if (isset($std['field']) && $std['field'] == 'BBA') echo 'selected'; ?>>BBA</option>
-                        <option value="BCA" <?php if (isset($std['field']) && $std['field'] == 'BCA') echo 'selected'; ?>>BCA</option>
-                        <option value="BSCIT" <?php if (isset($std['field']) && $std['field'] == 'BSCIT') echo 'selected'; ?>>BSCIT</option>
+                        <option value="BBA" <?php echo isset($student['field']) && $student['field'] == 'BBA' ? 'selected' : ''; ?>>
+                            BBA
+                        </option>
+                        <option value="BCA" <?php echo isset($student['field']) && $student['field'] == 'BCA' ? 'selected' : ''; ?>>
+                            BCA
+                        </option>
+                        <option value="BSCIT" <?php echo isset($student['field']) && $student['field'] == 'BSCIT' ? 'selected' : ''; ?>>
+                            BSCIT
+                        </option>
                     </select>
 
                     <span id="demo3" class="error" style="color:red;">***choose your field***</span>
 
                     <label for="dob" class="name">DOB:</label>
-                    <input type="date" class="input" name="dob" id="dob" placeholder=" Birthdate" value="<?php echo $std['dob']; ?>" autocomplete="bday" />
+                    <input type="date" class="input" name="dob" id="dob" placeholder=" Birthdate"
+                        value="<?php echo isset($student['dob']) ? $student['dob'] : ''; ?>" autocomplete="bday" />
                     <span id="demo4" class="error" style="color:red;">***enter your birthdate***</span>
 
                     <label for="gender" class="name">Gender:</label><br>
                     <div class="gender-options input">
-                        <input type="radio" name="gender" value="Male" id="male" <?php if ($std['gender'] == 'Male') echo 'checked'; ?> autocomplete="sex" />
+                        <input type="radio" name="gender" value="Male" id="male" <?php echo (isset($student['gender']) && $student['gender'] == 'Male') ? 'checked' : ''; ?> autocomplete="sex" />
                         <label for="male" class="label">Male</label>
 
-                        <input type="radio" name="gender" value="Female" id="female" <?php if ($std['gender'] == 'Female') echo 'checked'; ?> autocomplete="sex" />
+                        <input type="radio" name="gender" value="Female" id="female" <?php echo (isset($student['gender']) && $student['gender'] == 'Female') ? 'checked' : ''; ?> autocomplete="sex" />
                         <label for="female" class="label">Female</label>
 
-                        <input type="radio" name="gender" value="Other" id="other" <?php if ($std['gender'] == 'Other') echo 'checked'; ?> autocomplete="sex" />
+                        <input type="radio" name="gender" value="Other" id="other" <?php echo (isset($student['gender']) && $student['gender'] == 'Other') ? 'checked' : ''; ?> autocomplete="sex" />
                         <label for="other" class="label">Other</label>
                     </div>
                     <span id="demo5" class="error" style="color:red;">***select the Gender***</span>
@@ -119,35 +166,53 @@ mysqli_close($conn);
                     <h3 class="fs-subtitle">Provide your contact details</h3>
 
                     <label for="contact" class="name">Contact:</label>
-                    <input type="tel" class="input" name="contact" id="contact" value="<?php echo $std['contact']; ?>" placeholder="Please enter your phone number" autocomplete="tel" />
+                    <input type="tel" class="input" name="contact" id="contact"
+                        value="<?php echo isset($student['contact']) ? $student['contact'] : ''; ?>"
+                        placeholder="Please enter your phone number" autocomplete="tel" />
                     <span id="demo6" class="error" style="color:red;">***enter your contact***</span>
 
-                    <label for="email" class="name">Email:</label>
-                    <input type="email" class="input" name="email" id="email" value="<?php echo $std['email']; ?>" placeholder="Please enter your email address" autocomplete="email" />
-                    <span id="demo7" class="error" style="color:red;">***enter your Email***</span>
+                    <label for="hobbie" class="name">Hobbies:</label><br>
+                    <div class="gender-options input">
+
+
+                        <?php
+                        $hobbies = isset($student['hobbies']) ? explode(", ", $student['hobbies']) : [];
+                        $hobbyList = ["Reading", "Learning", "Writing", "Playing", "Singing"];
+                        foreach ($hobbyList as $hobby) {
+                            $isChecked = in_array($hobby, $hobbies) ? 'checked' : '';
+                            echo "<label class='checkbox-inline'>
+                                        <input type='checkbox' name='hobbie[]' id='hobbies_$hobby' value='$hobby' $isChecked> $hobby
+                                </label>";
+                        }
+                        ?>
+
+                    </div>
+                    <span id="demo7" class="error" style="color:red;">***select at least one hobbie***</span>
+
 
                     <label for="address" class="name">Address:</label>
-                    <textarea class="input" name="address" id="address" placeholder="Please enter your address" autocomplete="address-line1"><?php echo $std['address']; ?></textarea>
+                    <textarea class="input" name="address" id="address" placeholder="Please enter your address"
+                        autocomplete="address-line1">  <?php echo isset($student['address']) ? $student['address'] : ''; ?></textarea>
                     <span id="demo8" class="error" style="color:red;">***enter your Address***</span>
 
                     <label for="city" class="name">City:</label>
                     <select name="city" class="input" id="city" autocomplete="off">
                         <option value="">Select City</option>
-                        <option value="Surat" <?php if ($std['city'] == 'Surat') echo 'selected'; ?>>Surat</option>
-                        <option value="Mumbai" <?php if ($std['city'] == 'Mumbai') echo 'selected'; ?>>Mumbai</option>
-                        <option value="Udaipur" <?php if ($std['city'] == 'Udaipur') echo 'selected'; ?>>Udaipur</option>
-                        <option value="Bhavnagar" <?php if ($std['city'] == 'Bhavnagar') echo 'selected'; ?>>Bhavnagar</option>
-                        <option value="Pune" <?php if ($std['city'] == 'Pune') echo 'selected'; ?>>Pune</option>
-                        <option value="Jaipur" <?php if ($std['city'] == 'Jaipur') echo 'selected'; ?>>Jaipur</option>
+                        <option value="">Select City</option>
+                        <option value="Surat" <?php echo (isset($student['city']) && $student['city'] == 'Surat') ? 'selected' : ''; ?>>Surat</option>
+                        <option value="Mumbai" <?php echo (isset($student['city']) && $student['city'] == 'Mumbai') ? 'selected' : ''; ?>>Mumbai</option>
+                        <option value="Udaipur" <?php echo (isset($student['city']) && $student['city'] == 'Udaipur') ? 'selected' : ''; ?>>Udaipur</option>
+                        <option value="Pune" <?php echo (isset($student['city']) && $student['city'] == 'Pune') ? 'selected' : ''; ?>>Pune</option>
+                        <option value="Jaipur" <?php echo (isset($student['city']) && $student['city'] == 'Jaipur') ? 'selected' : ''; ?>>Jaipur</option>
                     </select>
                     <span id="demo9" class="error" style="color:red;">***select city***</span>
 
                     <label for="state" class="name">State:</label>
                     <select name="state" class="input" id="state" autocomplete="off">
                         <option value="">Select State</option>
-                        <option value="Gujarat" <?php if ($std['state'] == 'Gujarat') echo 'selected'; ?>>Gujarat</option>
-                        <option value="Maharashtra" <?php if ($std['state'] == 'Maharashtra') echo 'selected'; ?>>Maharashtra</option>
-                        <option value="Rajasthan" <?php if ($std['state'] == 'Rajasthan') echo 'selected'; ?>>Rajasthan</option>
+                        <option value="Gujarat" <?php echo (isset($student['state']) && $student['state'] == 'Gujarat') ? 'selected' : ''; ?>>Gujarat</option>
+                        <option value="Maharashtra" <?php echo (isset($student['state']) && $student['state'] == 'Maharashtra') ? 'selected' : ''; ?>>Maharashtra</option>
+                        <option value="Rajasthan" <?php echo (isset($student['state']) && $student['state'] == 'Rajasthan') ? 'selected' : ''; ?>>Rajasthan</option>
                     </select>
                     <span id="demo10" class="error" style="color:red;">***select state***</span>
 
@@ -160,33 +225,75 @@ mysqli_close($conn);
                     <h2 class="fs-title">Account Setup</h2>
                     <h3 class="fs-subtitle">Create your account details</h3>
 
+                    <label for="email" class="name">Email:</label>
+                    <input type="email" class="input" name="email" id="email" value="<?php echo isset($student['email']) ? $student['email'] : ''; ?>"
+                        placeholder="Please enter your email address" autocomplete="email" />
+                    <span id="demo12" class="error" style="color:red;">***enter your Email***</span>
                     <!-- Username -->
                     <label for="username" class="name">Username:</label>
-                    <input type="text" class="input" name="username" id="username" value="<?php echo $std['username']; ?>" placeholder="Enter your username" autocomplete="username" />
-                    <span id="demo12" class="error" style="color:red;">***enter your Username***</span>
+                    <input type="text" class="input" name="username" id="username"
+                    value="<?php echo isset($student['username']) ? $student['username'] : ''; ?>"  placeholder="Enter your username"
+                        autocomplete="username" />
+                    <span id="demo13" class="error" style="color:red;">***enter your Username***</span>
 
                     <!-- Password -->
                     <label for="password" class="name">Password:</label>
-                    <input type="text" class="input" name="password" id="password" value="<?php echo $std['password']; ?>" placeholder="Enter your password" autocomplete="new-password" />
-                    <span id="demo13" class="error" style="color:red;">***enter your password***</span>
+                    <input type="text" class="input" name="password" id="password"
+                    value="<?php echo isset($student['password']) ? $student['password'] : ''; ?>" placeholder="Enter your password"
+                        autocomplete="new-password" />
+                    <span id="demo14" class="error" style="color:red;">***enter your password***</span>
                     <input type="button" name="previous" class="previous action-button-previous" value="Previous" />
-                    <input type="submit" name="submit" class="submit action-button" value="Submit" />
+                    <input type="submit" name="submit" class="submit action-button" value="Update" />
                 </fieldset>
 
 
                 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
             </form>
+            <div id="resultMessage"></div>
         </div>
     </div>
 
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- jQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.1/jquery.validate.min.js"></script>
 
 
+    <!-- Bootstrap JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
-    <script src="form.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="form1.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#msform").on("submit", function (event) {
+                event.preventDefault(); // Prevent default form submission
+
+                $.ajax({
+                    url: "update.php",
+                    type: "POST",
+                    data: $(this).serialize(), // Serialize form data
+                    dataType: "json", // Expect JSON response
+                    success: function (response) {
+                        if (response.success) {
+                            $("#resultMessage").html(`<div class="alert alert-success">${response.message}</div>`);
+
+                            setTimeout(function () {
+                                window.location.href = "display.php";
+                            }, 2000);
+                        } else {
+                            $("#resultMessage").html(`<div class="alert alert-danger">${response.message}</div>`);
+                        }
+                    }
+                });
+            });
+        });
+
+
+    </script>
+
 </body>
 
 

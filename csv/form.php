@@ -125,43 +125,50 @@
             <div class="col-md-6 mx-auto mt-5">
                 <div class="card bg-light">
                     <article class="card-body " style="max-width: 1000px;">
+                    <div id="successmes"></div>
                         <h4 class="card-title mt-2 mb-3 text-center"> ADD STUDENT DETAILS</h4>
-                        <form action="insert.php" method="post" id="stddata" enctype="multipart/form-data">
+                        <form id="stddata" enctype="multipart/form-data">
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-user"></i> </span>
                                 </div>
-                                <input name="fname" id="fname" class="form-control" placeholder="First name" type="text">
+                                <input name="fname" id="fname" class="form-control" placeholder="First name"
+                                    type="text">
                             </div>
                             <span id="demo1" style="color: red;">Please enter Full name</span>
-                            
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
-                                </div>
-                                <input name="email" id="email" class="form-control" placeholder="Email address" type="text">
-                            </div>
-                            <span id="demo3" style="color: red;">Please enter valid email address</span>
+
+
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text"> <i class="fa fa-phone"></i> </span>
                                 </div>
-                                <input name="contact" id="contact" class="form-control" placeholder="Phone number" type="text">
+                                <input name="contact" id="contact" class="form-control" placeholder="Phone number"
+                                    type="text">
                             </div>
-                            <span id="demo4" style="color: red;">Please enter mobile number (only 10 digits allowed)</span>
-                         
-                           
-                           
+                            <span id="demo4" style="color: red;">Please enter mobile number (only 10 digits
+                                allowed)</span>
+
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                                </div>
+                                <input name="email" id="email" class="form-control" placeholder="Email address"
+                                    type="text">
+                            </div>
+                            <span id="demo3" style="color: red;">Please enter valid email address</span>
+
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-block">SAVE</button>
+                                <button type="button" id="reg" class="btn btn-primary btn-block">SAVE</button>
                             </div>
                         </form>
                         <p class="divider-text">
                             <span class="bg-light">OR</span>
                         </p>
                         <p>
-                            <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-google"></i>   Login via Google</a>
-                            <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via Facebook</a>
+                            <a href="" class="btn btn-block btn-twitter"> <i class="fab fa-google"></i>   Login via
+                                Google</a>
+                            <a href="" class="btn btn-block btn-facebook"> <i class="fab fa-facebook-f"></i>   Login via
+                                Facebook</a>
                         </p>
                     </article>
                 </div>
@@ -173,12 +180,12 @@
 
     <!-- validation -->
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             $("#demo1").hide();
             $("#demo3").hide();
             $("#demo4").hide();
 
-            $("#stddata").submit(function(e) {
+            $("#reg").click(function (e) {
                 var isValid = true;
 
                 function showError(elementId, inputGroup) {
@@ -199,7 +206,7 @@
                 } else {
                     hideError("#demo1", "#fname");
                 }
-                
+
                 // Email Validation
                 var email = $("#email").val().trim();
                 var emailPattern = /^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
@@ -217,8 +224,32 @@
                     hideError("#demo4", "#contact");
                 }
                 // Prevent form submission if any field is invalid
-                if (!isValid) {
-                    e.preventDefault();
+                if (isValid) {
+
+                    let stddata = document.getElementById("stddata");
+                    let fd = new FormData(stddata);
+                    $.ajax({
+                        url: "insert.php",
+                        type: "POST",
+                        data: fd,
+                        contentType: false,
+                        processData: false,
+                        dataType: "json",
+                        success: function (response) {
+                            if (response.status === "success") {
+                                $("#successmes").html(`<div class="alert alert-success">${response.message}</div>`);
+                                $("#stddata")[0].reset();
+                                setTimeout(function () {
+                                    window.location.href = "display.php";
+                                }, 1000);
+                            } else {
+                                alert("Error: " + response.message);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("An error occurred: " + xhr.responseText);
+                        }
+                    });
                 }
             });
         });
